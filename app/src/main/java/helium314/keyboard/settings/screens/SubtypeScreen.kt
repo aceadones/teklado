@@ -268,7 +268,7 @@ fun SubtypeScreen(
                                         showLayoutEditDialog = true
                                     }) {
                                         Icon(
-                                            painterResource(R.drawable.ic_edit),
+                                            painterResource(R.drawable.lc_pencil),
                                             stringResource(R.string.edit_layout)
                                         )
                                     }
@@ -420,7 +420,7 @@ private fun MainLayoutRow(
             },
             extraButton = {
                 IconButton({ showAddLayoutDialog = true })
-                { Icon(painterResource(R.drawable.ic_plus), stringResource(R.string.button_title_add_custom_layout)) }
+                { Icon(painterResource(R.drawable.lc_plus), stringResource(R.string.button_title_add_custom_layout)) }
             }
         ) {
             var showLayoutDeleteDialog by remember { mutableStateOf(false) }
@@ -431,9 +431,9 @@ private fun MainLayoutRow(
             ) {
                 Text(SubtypeLocaleUtils.getLayoutDisplayNameInSystemLocale(it, currentSubtype.locale))
                 Row (verticalAlignment = Alignment.CenterVertically) {
-                    IconButton({ showLayoutEditDialog = it to null }) { Icon(painterResource(R.drawable.ic_edit), stringResource(R.string.edit_layout)) }
+                    IconButton({ showLayoutEditDialog = it to null }) { Icon(painterResource(R.drawable.lc_pencil), stringResource(R.string.edit_layout)) }
                     if (it in customLayouts)
-                        IconButton({ showLayoutDeleteDialog = true }) { Icon(painterResource(R.drawable.ic_bin), stringResource(R.string.delete)) }
+                        IconButton({ showLayoutDeleteDialog = true }) { Icon(painterResource(R.drawable.lc_trash_2), stringResource(R.string.delete)) }
                 }
             }
             if (showLayoutDeleteDialog) {

@@ -133,8 +133,6 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private var kitchenReady = false
     private val suggestionsStrip: ViewGroup = findViewById(R.id.suggestions_strip)
     private val toolbarExpandKey = findViewById<ImageButton>(R.id.suggestions_strip_toolbar_key)
-    private val toolbarMenuIcon = KeyboardIconsSet.instance.getNewDrawable(KeyboardIconsSet.NAME_TOOLBAR_KEY, context)
-    private val toolbarCloseIcon = KeyboardIconsSet.instance.getNewDrawable(ToolbarKey.CLOSE_HISTORY.name, context)
     private var toolbarPanelOpen = false
     private val defaultToolbarBackground: Drawable = toolbarExpandKey.background
     private val enabledToolKeyBackground = GradientDrawable()
@@ -657,7 +655,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private fun updateMenuButton() {
         val showMenu = Settings.getValues().mToolbarMode != ToolbarMode.HIDDEN
         toolbarExpandKey.scaleX = 1f
-        toolbarExpandKey.setImageDrawable(if (toolbarPanelOpen) toolbarCloseIcon else toolbarMenuIcon)
+        val menuIconName = if (toolbarPanelOpen) ToolbarKey.CLOSE_HISTORY.name else KeyboardIconsSet.NAME_TOOLBAR_KEY
+        toolbarExpandKey.setImageDrawable(KeyboardIconsSet.instance.getNewDrawable(menuIconName, context))
         toolbarExpandKey.contentDescription = resources.getString(
             if (toolbarPanelOpen) R.string.dialog_close else R.string.toolbar_menu
         )

@@ -715,10 +715,12 @@ New dictionary:
     <string name="user_dict_add_word_button">Add a word</string>
     <!-- Option for choosing theme style -->
     <string name="theme_style">Style</string>
-    <!-- Option for choosing icon style (same options as theme_style) -->
+    <!-- Option for choosing icon style. Lucide is the default; Material, Holo and Rounded stay available. -->
     <string name="icon_style">Icon style</string>
     <!-- Style name for Rounded style -->
     <string name="style_name_Rounded" tools:keep="@string/style_name_Rounded">Rounded</string>
+    <!-- Icon style name. Looked up at runtime as style_name_ + value, so tools:keep is required. -->
+    <string name="style_name_Lucide" tools:keep="@string/style_name_Lucide">Lucide</string>
     <!-- Option for choosing colors -->
     <string name="theme_colors">Colors</string>
     <!-- Option for choosing colors for night mode -->
@@ -813,6 +815,8 @@ New dictionary:
     <string name="about_github_link_description">Open source under GPL-3.0, built on HeliBoard (by Helium314 and contributors) and the Android Open Source Project keyboard.</string>
     <string name="about_developer_title">Developer</string>
     <string name="about_developer_body">NextLayer Labs</string>
+    <string name="about_icons_title">Icons</string>
+    <string name="about_icons_body">Lucide (lucide.dev, ISC license)</string>
     <string name="about_official_name">Teklado by NextLayer Labs</string>
     <!-- link to the wiki for about screen -->
     <string name="about_wiki_link">Go to Wiki</string>

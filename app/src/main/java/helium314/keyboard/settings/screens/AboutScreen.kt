@@ -5,10 +5,16 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
+import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Surface
@@ -55,6 +61,7 @@ fun AboutScreen(
         SettingsWithoutKey.APP,
         SettingsWithoutKey.VERSION,
         SettingsWithoutKey.LICENSE,
+        SettingsWithoutKey.ICONS,
         SettingsWithoutKey.DEVELOPER,
         SettingsWithoutKey.HIDDEN_FEATURES,
         SettingsWithoutKey.GITHUB,
@@ -81,7 +88,7 @@ fun createAboutSettings(context: Context) = listOf(
             name = it.title,
             description = it.description,
             onClick = { },
-            icon = R.drawable.ic_settings_about
+            icon = R.drawable.lc_user_round
         )
     },
     Setting(context, SettingsWithoutKey.VERSION, R.string.version) {
@@ -99,7 +106,7 @@ fun createAboutSettings(context: Context) = listOf(
                 prefs.edit { putBoolean(DebugSettings.PREF_SHOW_DEBUG_SETTINGS, true) }
                 Toast.makeText(ctx, R.string.prefs_debug_settings_enabled, Toast.LENGTH_LONG).show()
             },
-            icon = R.drawable.ic_settings_about_version
+            icon = R.drawable.lc_tag
         )
     },
     Setting(context, SettingsWithoutKey.LICENSE, R.string.license, R.string.gnu_gpl) {
@@ -113,7 +120,15 @@ fun createAboutSettings(context: Context) = listOf(
                 intent.action = Intent.ACTION_VIEW
                 ctx.startActivity(intent)
             },
-            icon = R.drawable.ic_settings_about_license
+            icon = R.drawable.lc_scale
+        )
+    },
+    Setting(context, SettingsWithoutKey.ICONS, R.string.about_icons_title, R.string.about_icons_body) {
+        Preference(
+            name = it.title,
+            description = it.description,
+            onClick = { },
+            icon = R.drawable.lc_sparkles
         )
     },
     Setting(context, SettingsWithoutKey.HIDDEN_FEATURES, R.string.hidden_features_title, R.string.hidden_features_summary) {
@@ -129,7 +144,7 @@ fun createAboutSettings(context: Context) = listOf(
                 val message = ctx.getString(R.string.hidden_features_message, link)
                 val dialogMessage = SpannableStringUtils.fromHtml(message)
                 val builder = AlertDialog.Builder(ctx)
-                    .setIcon(R.drawable.ic_settings_about_hidden_features)
+                    .setIcon(themedIcon(ctx, R.drawable.lc_eye_off))
                     .setTitle(R.string.hidden_features_title)
                     .setMessage(dialogMessage)
                     .setPositiveButton(R.string.dialog_close, null)
@@ -137,7 +152,7 @@ fun createAboutSettings(context: Context) = listOf(
                 builder.show()
                 (builder.findViewById<View>(android.R.id.message) as TextView).movementMethod = LinkMovementMethod.getInstance()
             },
-            icon = R.drawable.ic_settings_about_hidden_features
+            icon = R.drawable.lc_eye_off
         )
     },
     Setting(context, SettingsWithoutKey.GITHUB_WIKI, R.string.about_wiki_link, R.string.about_wiki_link_description) {
@@ -151,7 +166,7 @@ fun createAboutSettings(context: Context) = listOf(
                 intent.action = Intent.ACTION_VIEW
                 ctx.startActivity(intent)
             },
-            icon = R.drawable.ic_settings_about_wiki
+            icon = R.drawable.lc_book_open
         )
     },
     Setting(context, SettingsWithoutKey.COMMUNITY_LINKS, R.string.about_community_links, R.string.about_community_links_description) {
@@ -165,9 +180,9 @@ fun createAboutSettings(context: Context) = listOf(
                 intent.action = Intent.ACTION_VIEW
                 ctx.startActivity(intent)
             },
-            icon = R.drawable.ic_settings_about_community
+            icon = R.drawable.lc_message_square_text
         )
-     },
+    },
     Setting(context, SettingsWithoutKey.GITHUB, R.string.about_github_link, R.string.about_github_link_description) {
         val ctx = LocalContext.current
         Preference(
@@ -179,7 +194,7 @@ fun createAboutSettings(context: Context) = listOf(
                 intent.action = Intent.ACTION_VIEW
                 ctx.startActivity(intent)
             },
-            icon = R.drawable.ic_settings_about_github
+            icon = R.drawable.lc_github
         )
     },
     Setting(context, SettingsWithoutKey.SAVE_LOG, R.string.save_log) { setting ->
@@ -212,10 +227,18 @@ fun createAboutSettings(context: Context) = listOf(
                     )
                 launcher.launch(intent)
             },
-            icon = R.drawable.ic_settings_about_log
+            icon = R.drawable.lc_file_text
         )
     },
 )
+
+private fun themedIcon(context: Context, @DrawableRes id: Int): Drawable? {
+    val icon = ContextCompat.getDrawable(context, id)?.mutate() ?: return null
+    val tv = TypedValue()
+    val color = if (context.theme.resolveAttribute(android.R.attr.textColorPrimary, tv, true)) tv.data else Color.BLACK
+    DrawableCompat.setTint(icon, color)
+    return icon
+}
 
 @Preview
 @Composable

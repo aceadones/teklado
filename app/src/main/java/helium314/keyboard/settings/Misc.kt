@@ -233,9 +233,9 @@ fun ExpandableSettingsCard(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Icon(
-                    painterResource(R.drawable.ic_arrow_left),
+                    painterResource(R.drawable.lc_chevron_down),
                     contentDescription = title,
-                    modifier = Modifier.rotate(if (expanded) 90f else -90f),
+                    modifier = Modifier.rotate(if (expanded) 180f else 0f),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

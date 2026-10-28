@@ -57,6 +57,7 @@ class SuggestTest {
     }
 
     @BeforeTest fun reset() {
+        helium314.keyboard.latin.glide.GlideBatchSuggestions.builtInEnabled = false // tests mock the facilitator's gesture results
         latinIME.prefs().edit { clear() }
         currentTypingLocale = Locale.ENGLISH
         tapTypingSuggestions = suggestionResults(emptyList())

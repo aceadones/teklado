@@ -55,7 +55,6 @@ class ToolbarPanelView @JvmOverloads constructor(
     View.OnLongClickListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private val pinIconId: Int
     private lateinit var editButton: View
     private lateinit var editIcon: ImageView
     private lateinit var editLabel: TextView
@@ -65,14 +64,6 @@ class ToolbarPanelView @JvmOverloads constructor(
     private var keyboardActionListener: KeyboardActionListener? = null
     private var editMode = false
     private var keysReady = false
-
-    init {
-        val styled = context.obtainStyledAttributes(
-            null, R.styleable.ClipboardHistoryView, R.attr.clipboardHistoryViewStyle, R.style.ClipboardHistoryView)
-        pinIconId = styled.getResourceId(R.styleable.ClipboardHistoryView_iconPinnedClip, 0)
-            .takeIf { it != 0 } ?: R.drawable.ic_clipboard_pin_lxx
-        styled.recycle()
-    }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -269,23 +260,24 @@ class ToolbarPanelView @JvmOverloads constructor(
         content.addView(icon)
         content.addView(text)
         tile.addView(content)
-        if (pinIconId != 0) {
-            val pin = ImageView(context).apply {
-                tag = PIN_BADGE
-                setImageResource(pinIconId)
-                scaleType = ImageView.ScaleType.FIT_CENTER
-                importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
-                isVisible = editMode && pinned
-                layoutParams = FrameLayout.LayoutParams(
-                    16.dpToPx(resources), 16.dpToPx(resources), Gravity.TOP or Gravity.END
-                ).apply {
-                    topMargin = 4.dpToPx(resources)
-                    marginEnd = 4.dpToPx(resources)
-                }
+        val pin = ImageView(context).apply {
+            tag = PIN_BADGE
+            setImageResource(R.drawable.lc_pin)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
+            isVisible = editMode && pinned
+            layoutParams = FrameLayout.LayoutParams(
+                16.dpToPx(resources), 16.dpToPx(resources), Gravity.TOP or Gravity.END
+            ).apply {
+                topMargin = 4.dpToPx(resources)
+                marginEnd = 4.dpToPx(resources)
             }
-            colors.setColor(pin, ColorType.CLIPBOARD_PIN)
-            tile.addView(pin)
         }
+        pin.drawable?.mutate()?.let { drawable ->
+            DrawableCompat.setTint(drawable, colors.get(ColorType.CLIPBOARD_PIN))
+            pin.setImageDrawable(drawable)
+        }
+        tile.addView(pin)
         return tile
     }
 

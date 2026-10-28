@@ -40,7 +40,7 @@
                 android:id="@+id/toolbar_panel_edit_icon"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:src="@drawable/ic_edit"
+                android:src="@drawable/lc_pencil"
                 android:importantForAccessibility="no"
                 android:contentDescription="@null" />
 

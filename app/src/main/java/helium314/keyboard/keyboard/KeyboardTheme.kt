@@ -47,6 +47,8 @@ private constructor(val themeId: Int, @JvmField val mStyleId: Int) {
         const val STYLE_MATERIAL = "Material"
         const val STYLE_HOLO = "Holo"
         const val STYLE_ROUNDED = "Rounded"
+        /** Toolbar and key icons from Lucide (lucide.dev, ISC). Not a keyboard theme. */
+        const val STYLE_LUCIDE = "Lucide"
 
         // new themes that are just colors
         const val THEME_LIGHT = "light"
@@ -83,6 +85,8 @@ private constructor(val themeId: Int, @JvmField val mStyleId: Int) {
             THEME_VIOLETTE
         )
         val STYLES = arrayOf(STYLE_MATERIAL, STYLE_HOLO, STYLE_ROUNDED)
+        /** Icon-style setting. Lucide is listed here only; it is not a [STYLES] theme. */
+        val ICON_STYLES = arrayOf(STYLE_LUCIDE, STYLE_MATERIAL, STYLE_HOLO, STYLE_ROUNDED)
 
         // These should be aligned with Keyboard.themeId and Keyboard.Case.keyboardTheme
         // attributes' values in attrs.xml.

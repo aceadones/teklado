@@ -10,12 +10,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.content.edit
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.latin.R
+import helium314.keyboard.latin.common.ColorType
 import helium314.keyboard.latin.define.DebugFlags
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.settings.setFloatingSize
@@ -44,11 +46,18 @@ object FloatingKeyboardUtils {
         if (DebugFlags.DEBUG_ENABLED)
             Log.d(TAG, "place floating view at $x, $y, width ${Settings.getValues().mFloatingWidth}, height ${Settings.getValues().mFloatingHeight}")
         ViewLayoutUtils.placeViewAt(view, x, y, Settings.getValues().mFloatingWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
+        tintFloatingHandle(view.findViewById(R.id.drag_handle))
+        tintFloatingHandle(view.findViewById(R.id.resize_handle))
         if (view.findViewById<View>(R.id.float_handle_container)?.isVisible == true)
             return
         view.findViewById<View>(R.id.float_handle_container)?.isVisible = true
         view.findViewById<ImageView>(R.id.drag_handle)?.setDragListener(view)
         view.findViewById<ImageView>(R.id.resize_handle)?.setResizeListener(lp)
+    }
+
+    private fun tintFloatingHandle(icon: ImageView?) {
+        val drawable = icon?.drawable?.mutate() ?: return
+        DrawableCompat.setTint(drawable, Settings.getValues().mColors.get(ColorType.KEY_TEXT))
     }
 
     @JvmStatic

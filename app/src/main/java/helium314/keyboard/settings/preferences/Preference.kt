@@ -134,7 +134,7 @@ private fun PreferencePreview() {
                 Preference(
                     name = "Preference with icon",
                     onClick = {},
-                    icon = R.drawable.ic_settings_about
+                    icon = R.drawable.lc_info
                 )
                 SliderPreference(
                     name = "SliderPreference",
@@ -147,7 +147,7 @@ private fun PreferencePreview() {
                     name = "Preference with icon and description",
                     description = "some text",
                     onClick = {},
-                    icon = R.drawable.ic_settings_about
+                    icon = R.drawable.lc_info
                 )
                 Preference(
                     name = "Preference with switch",
@@ -165,7 +165,7 @@ private fun PreferencePreview() {
                     onClick = {},
                     description = "A long description which may actually be several lines long, so it should wrap."
                 ) {
-                    Icon(painterResource(R.drawable.ic_arrow_left), null)
+                    Icon(painterResource(R.drawable.lc_chevron_right), null)
                 }
                 Preference(
                     name = "Long preference name that wraps",

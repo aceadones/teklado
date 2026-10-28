@@ -53,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -186,7 +185,7 @@ fun ReviewScreen(
                         },
                         backgroundContent = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(painterResource(R.drawable.ic_bin), stringResource(R.string.delete))
+                                Icon(painterResource(R.drawable.lc_trash_2), stringResource(R.string.delete))
                                 val undoVisible = dismissState.progress == 1f && dismissState.settledValue == SwipeToDismissBoxValue.StartToEnd
                                 TextButton(
                                     onClick = {
@@ -375,7 +374,7 @@ private fun BottomBar(
                 ) {
                     Column {
                         Icon(
-                            painterResource(R.drawable.ic_bin),
+                            painterResource(R.drawable.lc_trash_2),
                             stringResource(R.string.delete),
                             Modifier.align(Alignment.CenterHorizontally).size(30.dp)
                         )
@@ -390,7 +389,7 @@ private fun BottomBar(
                 ) {
                     Column {
                         Icon(
-                            painterResource(R.drawable.ic_share),
+                            painterResource(R.drawable.lc_upload),
                             "share",
                             Modifier.align(Alignment.CenterHorizontally).size(30.dp)
                         )
@@ -404,7 +403,7 @@ private fun BottomBar(
                     }
                 ) {
                     Icon(
-                        painterResource(R.drawable.ic_sort_alphabetically),
+                        painterResource(R.drawable.lc_book_a),
                         "sort alphabetically"
                     )
                 }
@@ -415,7 +414,7 @@ private fun BottomBar(
                     }
                 ) {
                     Icon(
-                        painterResource(R.drawable.ic_sort_chronologically),
+                        painterResource(R.drawable.lc_arrow_down),
                         "sort chronologically"
                     )
                 }
@@ -470,7 +469,7 @@ private fun TopBar(
         navigationIcon = {
             IconButton(onClick = onClickBack) {
                 Icon(
-                    painterResource(R.drawable.ic_arrow_back),
+                    painterResource(R.drawable.lc_arrow_left),
                     stringResource(R.string.spoken_description_action_previous)
                 )
             }
@@ -480,7 +479,7 @@ private fun TopBar(
                 var showMenu by remember { mutableStateOf(false) }
                 IconButton(
                     onClick = { showMenu = true }
-                ) { Icon(painterResource(R.drawable.ic_arrow_left), "menu", Modifier.rotate(-90f)) }
+                ) { Icon(painterResource(R.drawable.lc_chevron_down), "menu") }
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }

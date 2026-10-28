@@ -293,9 +293,9 @@ fun BackgroundGatheringSettings() {
                                 }
                             }
                             if (included)
-                                Icon(painterResource(R.drawable.ic_setup_check), "included", Modifier.size(32.dp), MaterialTheme.colorScheme.primary)
+                                Icon(painterResource(R.drawable.lc_check), "included", Modifier.size(32.dp), MaterialTheme.colorScheme.primary)
                             else
-                                Icon(painterResource(R.drawable.ic_close), "ignored", Modifier.size(32.dp), MaterialTheme.colorScheme.error)
+                                Icon(painterResource(R.drawable.lc_x), "ignored", Modifier.size(32.dp), MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -391,7 +391,7 @@ fun BackgroundGatheringSettings() {
                     Modifier.weight(0.2f)
                 ) {
                     val tint = if (error) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface
-                    Icon(painterResource(R.drawable.ic_plus), stringResource(R.string.add), tint = tint)
+                    Icon(painterResource(R.drawable.lc_plus), stringResource(R.string.add), tint = tint)
                 }
             }
             CompositionLocalProvider(

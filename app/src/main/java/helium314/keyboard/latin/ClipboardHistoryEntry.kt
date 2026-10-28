@@ -9,7 +9,9 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.DrawableCompat
 import helium314.keyboard.latin.common.ColorType
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.utils.Log
@@ -73,8 +75,11 @@ class ClipboardHistoryEntry(
             textView.text = textView.context.getString(R.string.item_type, info.label.toString()) + description
             return
         }
-        imageView.setImageResource(R.drawable.ic_dictionary)
-        Settings.getValues().mColors.setColor(imageView, ColorType.EMOJI_CATEGORY)
+        val icon = ContextCompat.getDrawable(imageView.context, R.drawable.lc_image)?.mutate()
+        if (icon != null) {
+            DrawableCompat.setTint(icon, Settings.getValues().mColors.get(ColorType.EMOJI_CATEGORY))
+            imageView.setImageDrawable(icon)
+        }
         textView.text = textView.context.getString(R.string.item_type, mimeTypes.first()) + description
     }
 }

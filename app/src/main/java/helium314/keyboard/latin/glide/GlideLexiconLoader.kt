@@ -106,7 +106,27 @@ internal object GlideLexiconCache {
             accept(builder, word, dictType, locale ?: facilitator.mainLocale)
             false
         }
+        addBundledWords(builder)
         return builder.build()
+    }
+
+    /** Extra word lists shipped in assets/glide, so Filipino words glide even without a Filipino dictionary. */
+    private fun addBundledWords(builder: GlideLexiconBuilder) {
+        val app = GlideAssets.context ?: return
+        try {
+            app.assets.open("glide/fil_words.tsv").bufferedReader().useLines { lines ->
+                for (line in lines) {
+                    if (line.isEmpty() || line[0] == '#') continue
+                    val tab = line.indexOf('\t')
+                    if (tab <= 0) continue
+                    val word = line.substring(0, tab)
+                    val freq = line.substring(tab + 1).trim().toIntOrNull() ?: continue
+                    builder.add(word, freq, false)
+                }
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "Could not read bundled glide words", t)
+        }
     }
 
     private fun accept(builder: GlideLexiconBuilder, word: WordProperty, dictType: String, locale: Locale) {
@@ -148,6 +168,11 @@ internal object GlideLexiconCache {
     }
 
     private class RawHolder(val key: String, val lexicon: GlideLexicon)
+}
+
+/** Application context for reading bundled glide word lists; set from LatinIME.onCreate. */
+object GlideAssets {
+    @Volatile @JvmField var context: android.content.Context? = null
 }
 
 internal object GlideGeometryAdapter {
@@ -203,6 +228,9 @@ internal object GlideGeometryAdapter {
  */
 object GlideBatchSuggestions {
     private const val TAG = "GlideLexicon"
+
+    /** Set to false (tests) to always use the dictionary facilitator's own gesture results. */
+    @Volatile @JvmField var builtInEnabled = true
     private val source = Dictionary.PhonyDictionary(Dictionary.TYPE_MAIN)
 
     /** Starts loading the word list in the background so the first swipe already has candidates. */

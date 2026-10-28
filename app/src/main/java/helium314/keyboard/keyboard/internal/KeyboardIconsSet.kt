@@ -2,6 +2,12 @@ package helium314.keyboard.keyboard.internal
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import helium314.keyboard.keyboard.KeyboardTheme
@@ -25,7 +31,8 @@ class KeyboardIconsSet private constructor() {
         val defaultIds = when (iconStyle) {
             KeyboardTheme.STYLE_HOLO -> keyboardIconsHolo
             KeyboardTheme.STYLE_ROUNDED -> keyboardIconsRounded
-            else -> keyboardIconsMaterial
+            KeyboardTheme.STYLE_MATERIAL -> keyboardIconsMaterial
+            else -> keyboardIconsLucide
         }
         val overrideIds = customIconIds(context, prefs)
         val ids = if (overrideIds.isEmpty()) defaultIds else defaultIds + overrideIds
@@ -34,7 +41,7 @@ class KeyboardIconsSet private constructor() {
         iconsByName.clear()
         ids.forEach { (name, id) ->
             try {
-                val icon = ContextCompat.getDrawable(context, id) ?: return@forEach
+                val icon = iconDrawable(context, id) ?: return@forEach
                 icon.setBounds(0, 0, icon.intrinsicWidth, icon.intrinsicHeight)
                 iconsByName[name] = icon
             } catch (_: Resources.NotFoundException) {
@@ -49,8 +56,8 @@ class KeyboardIconsSet private constructor() {
     }
 
     /** gets drawable from resources, with mutate (might be necessary to avoid coloring issues...) */
-    fun getNewDrawable(name: String?, context: Context): Drawable? = name?.lowercase(Locale.US)?.let { name ->
-        (iconIds[name] ?: iconIds[alternativeNames[name]])?.let { ContextCompat.getDrawable(context, it)?.mutate() }
+    fun getNewDrawable(name: String?, context: Context): Drawable? = name?.lowercase(Locale.US)?.let { key ->
+        (iconIds[key] ?: iconIds[alternativeNames[key]])?.let { iconDrawable(context, it) }
     }
 
     companion object {
@@ -289,15 +296,114 @@ class KeyboardIconsSet private constructor() {
             }
         } }
 
+        // Lucide (lucide.dev, ISC). Same names as the other styles so layouts keep working.
+        // Strokes are black; iconDrawable rasterizes them white so MODULATE / MULTIPLY tint still works.
+        private val keyboardIconsLucide by lazy { hashMapOf(
+            NAME_SHIFT_KEY to                   R.drawable.lc_arrow_big_up,
+            NAME_SHIFT_KEY_SHIFTED to           R.drawable.lc_arrow_big_up,
+            NAME_SHIFT_KEY_LOCKED to            R.drawable.lc_lock,
+            NAME_DELETE_KEY to                  R.drawable.lc_delete,
+            NAME_ENTER_KEY to                   R.drawable.lc_corner_down_left,
+            NAME_GO_KEY to                      R.drawable.lc_arrow_right,
+            NAME_SEARCH_KEY to                  R.drawable.lc_search,
+            NAME_SEND_KEY to                    R.drawable.lc_send,
+            NAME_DONE_KEY to                    R.drawable.lc_check,
+            NAME_NEXT_KEY to                    R.drawable.lc_arrow_right,
+            NAME_PREVIOUS_KEY to                R.drawable.lc_arrow_left,
+            NAME_TAB_KEY to                     R.drawable.lc_chevrons_right,
+            NAME_SPACE_KEY_FOR_NUMBER_LAYOUT to R.drawable.lc_space,
+            NAME_SHORTCUT_KEY_DISABLED to       R.drawable.lc_mic,
+            NAME_LANGUAGE_SWITCH_KEY to         R.drawable.lc_globe,
+            NAME_ZWNJ_KEY to                    R.drawable.lc_minus,
+            NAME_ZWJ_KEY to                     R.drawable.lc_plus,
+            NAME_STOP_ONEHANDED_KEY to          R.drawable.lc_maximize_2,
+            NAME_SWITCH_ONEHANDED_KEY to        R.drawable.lc_arrow_left_right,
+            NAME_RESIZE_ONEHANDED_KEY to        R.drawable.lc_move_horizontal,
+            NAME_TOOLBAR_KEY to                 R.drawable.lc_layout_grid,
+            NAME_BIN to                         R.drawable.lc_trash_2,
+        ).apply {
+            ToolbarKey.entries.forEach {
+                put(it.name.lowercase(Locale.US), when (it) {
+                    ToolbarKey.VOICE -> R.drawable.lc_mic
+                    ToolbarKey.CLIPBOARD -> R.drawable.lc_clipboard
+                    ToolbarKey.NUMPAD -> R.drawable.lc_hash
+                    ToolbarKey.DPAD -> R.drawable.lc_move_diagonal
+                    ToolbarKey.UNDO -> R.drawable.lc_undo_2
+                    ToolbarKey.REDO -> R.drawable.lc_redo_2
+                    ToolbarKey.SETTINGS -> R.drawable.lc_settings
+                    ToolbarKey.SELECT_ALL -> R.drawable.lc_text_select
+                    ToolbarKey.SELECT_WORD -> R.drawable.lc_type
+                    ToolbarKey.COPY -> R.drawable.lc_copy
+                    ToolbarKey.CUT -> R.drawable.lc_scissors
+                    ToolbarKey.PASTE -> R.drawable.lc_clipboard_paste
+                    ToolbarKey.ONE_HANDED -> R.drawable.lc_smartphone
+                    ToolbarKey.FLOATING -> R.drawable.lc_maximize_2
+                    ToolbarKey.INCOGNITO -> R.drawable.lc_eye_off
+                    ToolbarKey.AUTOCORRECT -> R.drawable.lc_spell_check
+                    ToolbarKey.CLEAR_CLIPBOARD -> R.drawable.lc_trash_2
+                    ToolbarKey.CLOSE_HISTORY -> R.drawable.lc_x
+                    ToolbarKey.EMOJI -> R.drawable.lc_sticker
+                    ToolbarKey.LEFT -> R.drawable.lc_arrow_left
+                    ToolbarKey.RIGHT -> R.drawable.lc_arrow_right
+                    ToolbarKey.UP -> R.drawable.lc_arrow_up
+                    ToolbarKey.DOWN -> R.drawable.lc_arrow_down
+                    ToolbarKey.WORD_LEFT -> R.drawable.lc_chevron_left
+                    ToolbarKey.WORD_RIGHT -> R.drawable.lc_chevron_right
+                    ToolbarKey.PAGE_UP -> R.drawable.lc_chevron_up
+                    ToolbarKey.PAGE_DOWN -> R.drawable.lc_chevron_down
+                    ToolbarKey.FULL_LEFT -> R.drawable.lc_chevrons_left
+                    ToolbarKey.FULL_RIGHT -> R.drawable.lc_chevrons_right
+                    ToolbarKey.PAGE_START -> R.drawable.lc_chevrons_left
+                    ToolbarKey.PAGE_END -> R.drawable.lc_chevrons_right
+                    ToolbarKey.SPLIT -> R.drawable.lc_columns_2
+                    ToolbarKey.BACKGROUND_GATHERING -> R.drawable.lc_hand
+                })
+            }
+        } }
+
+        private val lucideIconIds by lazy { keyboardIconsLucide.values.toSet() }
+
+        /** White raster of each Lucide vector, keyed by drawable id and density. Keyboard tint multiplies white pixels. */
+        private val lucideWhiteBitmaps = HashMap<Long, Bitmap>()
+
+        private fun iconDrawable(context: Context, id: Int): Drawable? {
+            if (id in lucideIconIds) {
+                val bitmap = whiteLucideBitmap(context, id) ?: return null
+                return BitmapDrawable(context.resources, bitmap).apply { setFilterBitmap(true) }
+            }
+            return ContextCompat.getDrawable(context, id)?.mutate()
+        }
+
+        private fun whiteLucideBitmap(context: Context, id: Int): Bitmap? {
+            val density = context.resources.displayMetrics.densityDpi
+            val key = (id.toLong() shl 32) or density.toLong()
+            lucideWhiteBitmaps[key]?.let { return it }
+            val source = ContextCompat.getDrawable(context, id)?.mutate() ?: return null
+            val width = source.intrinsicWidth.coerceAtLeast(1)
+            val height = source.intrinsicHeight.coerceAtLeast(1)
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            bitmap.density = density
+            val canvas = Canvas(bitmap)
+            source.setBounds(0, 0, width, height)
+            source.colorFilter = PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+            source.draw(canvas)
+            lucideWhiteBitmaps[key] = bitmap
+            return bitmap
+        }
+
         fun getAllIcons(context: Context): Map<String, List<Int>> {
             // currently active style first
             val iconStyle = context.prefs().getString(Settings.PREF_ICON_STYLE, Defaults.PREF_ICON_STYLE(context.prefs()))
-            val iconsMap = keyboardIconsMaterial.entries.associateTo(HashMap()) { (name, id) ->
+            val iconsMap = keyboardIconsLucide.entries.associateTo(HashMap()) { (name, lucideId) ->
+                val material = keyboardIconsMaterial[name]
+                val rounded = keyboardIconsRounded[name]
+                val holo = keyboardIconsHolo[name]
                 name to when (iconStyle) {
-                    KeyboardTheme.STYLE_HOLO -> listOfNotNull(keyboardIconsHolo[name], keyboardIconsRounded[name], id)
-                    KeyboardTheme.STYLE_ROUNDED -> listOfNotNull(keyboardIconsRounded[name], id, keyboardIconsHolo[name])
-                    else -> listOfNotNull(id, keyboardIconsRounded[name], keyboardIconsHolo[name])
-                }
+                    KeyboardTheme.STYLE_HOLO -> listOfNotNull(holo, rounded, material, lucideId)
+                    KeyboardTheme.STYLE_ROUNDED -> listOfNotNull(rounded, material, holo, lucideId)
+                    KeyboardTheme.STYLE_MATERIAL -> listOfNotNull(material, rounded, holo, lucideId)
+                    else -> listOfNotNull(lucideId, material, rounded, holo)
+                }.distinct()
             }
 
             // add legacy shift icons

@@ -120,31 +120,31 @@ private enum class DashboardSection(
         R.string.teklado_section_overview,
         R.string.teklado_overview_title,
         R.string.teklado_overview_subtitle,
-        R.drawable.ic_teklado_nav_overview,
+        R.drawable.lc_house,
     ),
     Typing(
         R.string.teklado_section_typing,
         R.string.teklado_typing_title,
         R.string.teklado_typing_subtitle,
-        R.drawable.ic_teklado_nav_typing,
+        R.drawable.lc_keyboard,
     ),
     Look(
         R.string.teklado_section_look,
         R.string.teklado_look_title,
         R.string.teklado_look_subtitle,
-        R.drawable.ic_teklado_nav_look,
+        R.drawable.lc_palette,
     ),
     Toolbar(
         R.string.teklado_section_toolbar,
         R.string.teklado_toolbar_title,
         R.string.teklado_toolbar_subtitle,
-        R.drawable.ic_teklado_nav_toolbar,
+        R.drawable.lc_sliders_horizontal,
     ),
     More(
         R.string.teklado_section_more,
         R.string.teklado_more_title,
         R.string.teklado_more_subtitle,
-        R.drawable.ic_teklado_nav_more,
+        R.drawable.lc_ellipsis,
     ),
 }
 
@@ -335,13 +335,13 @@ private fun DashboardHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         RoundIconButton(
-            icon = if (showSearch) R.drawable.ic_close else R.drawable.sym_keyboard_search_lxx,
+            icon = if (showSearch) R.drawable.lc_x else R.drawable.lc_search,
             contentDescription = stringResource(R.string.label_search_key),
             onClick = onSearch,
         )
         Spacer(Modifier.size(8.dp))
         RoundIconButton(
-            icon = R.drawable.sym_keyboard_settings_lxx,
+            icon = R.drawable.lc_info,
             contentDescription = stringResource(R.string.settings_screen_about),
             onClick = onAbout,
         )
@@ -367,7 +367,7 @@ private fun SearchField(
         trailingIcon = {
             if (query.text.isNotEmpty()) {
                 IconButton(onClick = onClear) {
-                    Icon(painterResource(R.drawable.ic_close), stringResource(android.R.string.cancel))
+                    Icon(painterResource(R.drawable.lc_x), stringResource(android.R.string.cancel))
                 }
             }
         },
@@ -507,9 +507,9 @@ private fun OverviewSection(
             SettingPref(Settings.PREF_CLIPBOARD_USE_FILES)
             if (clipboardFiles) SettingPref(Settings.PREF_CLIPBOARD_FILES_SIZE_LIMIT)
         }
-        NavRow(R.string.settings_screen_preferences, R.drawable.ic_settings_preferences, onClickPreferences)
+        NavRow(R.string.settings_screen_preferences, R.drawable.lc_settings, onClickPreferences)
         if (showGestureData)
-            NavRow(R.string.gesture_data_screen, R.drawable.ic_settings_gesture, onClickDataGathering)
+            NavRow(R.string.gesture_data_screen, R.drawable.lc_hand, onClickDataGathering)
     }
 }
 
@@ -536,7 +536,7 @@ private fun KeyboardStatusCards() {
     StatusCard(
         title = stringResource(if (enabled) R.string.teklado_status_enabled else R.string.teklado_status_disabled),
         body = stringResource(if (enabled) R.string.teklado_status_enabled_body else R.string.teklado_status_disabled_body),
-        icon = R.drawable.ic_teklado_nav_typing,
+        icon = R.drawable.lc_keyboard,
         done = enabled,
         action = if (enabled) null else stringResource(R.string.teklado_action_enable),
         onAction = {
@@ -548,7 +548,7 @@ private fun KeyboardStatusCards() {
     StatusCard(
         title = stringResource(if (current) R.string.teklado_status_selected else R.string.teklado_status_not_selected),
         body = stringResource(if (current) R.string.teklado_status_selected_body else R.string.teklado_status_not_selected_body),
-        icon = R.drawable.ic_setup_select,
+        icon = R.drawable.lc_toggle_right,
         done = current,
         action = if (enabled && !current) stringResource(R.string.teklado_action_switch) else null,
         onAction = {
@@ -619,7 +619,7 @@ private fun StatusCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        painterResource(R.drawable.ic_setup_check),
+                        painterResource(R.drawable.lc_check),
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(18.dp),
@@ -669,7 +669,7 @@ private fun TypingSection(
     SettingsCard(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
         NavRow(
             name = R.string.language_and_layouts_title,
-            icon = R.drawable.ic_settings_languages,
+            icon = R.drawable.lc_languages,
             description = languages.ifBlank { null },
             onClick = onClickLanguage,
         )
@@ -680,14 +680,14 @@ private fun TypingSection(
         title = stringResource(R.string.settings_screen_advanced),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
-        NavRow(R.string.settings_screen_preferences, R.drawable.ic_settings_preferences, onClickPreferences)
-        NavRow(R.string.settings_screen_correction, R.drawable.ic_settings_correction, onClickTextCorrection)
-        NavRow(R.string.dictionary_settings_category, R.drawable.ic_dictionary, onClickDictionaries)
-        NavRow(R.string.settings_screen_secondary_layouts, R.drawable.ic_settings_layout, onClickLayouts)
+        NavRow(R.string.settings_screen_preferences, R.drawable.lc_settings, onClickPreferences)
+        NavRow(R.string.settings_screen_correction, R.drawable.lc_spell_check, onClickTextCorrection)
+        NavRow(R.string.dictionary_settings_category, R.drawable.lc_book_a, onClickDictionaries)
+        NavRow(R.string.settings_screen_secondary_layouts, R.drawable.lc_columns_2, onClickLayouts)
         if (JniUtils.hasGlide())
-            NavRow(R.string.settings_screen_gesture, R.drawable.ic_settings_gesture, onClickGestureTyping)
+            NavRow(R.string.settings_screen_gesture, R.drawable.lc_hand, onClickGestureTyping)
         if (showGestureData)
-            NavRow(R.string.gesture_data_screen, R.drawable.ic_settings_gesture, onClickDataGathering)
+            NavRow(R.string.gesture_data_screen, R.drawable.lc_hand, onClickDataGathering)
     }
 }
 
@@ -746,7 +746,7 @@ private fun LookSection(prefs: SharedPreferences, onClickAppearance: () -> Unit)
         title = stringResource(R.string.settings_screen_advanced),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
-        NavRow(R.string.settings_screen_appearance, R.drawable.ic_settings_appearance, onClickAppearance)
+        NavRow(R.string.settings_screen_appearance, R.drawable.lc_palette, onClickAppearance)
     }
 }
 
@@ -769,7 +769,7 @@ private fun ToolbarSection(prefs: SharedPreferences, onClickToolbar: () -> Unit)
         title = stringResource(R.string.settings_screen_advanced),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
-        NavRow(R.string.settings_screen_toolbar, R.drawable.ic_settings_toolbar, onClickToolbar)
+        NavRow(R.string.settings_screen_toolbar, R.drawable.lc_layout_grid, onClickToolbar)
     }
 }
 
@@ -781,16 +781,16 @@ private fun MoreSection(
     onClickDataGathering: () -> Unit,
 ) {
     SettingsCard(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
-        NavRow(R.string.settings_screen_about, R.drawable.ic_settings_about, onClickAbout)
+        NavRow(R.string.settings_screen_about, R.drawable.lc_info, onClickAbout)
         SettingPref(SettingsWithoutKey.BACKUP_RESTORE)
     }
     ExpandableSettingsCard(
         title = stringResource(R.string.settings_screen_advanced),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
-        NavRow(R.string.settings_screen_advanced, R.drawable.ic_settings_advanced, onClickAdvanced)
+        NavRow(R.string.settings_screen_advanced, R.drawable.lc_cpu, onClickAdvanced)
         if (showGestureData)
-            NavRow(R.string.gesture_data_screen, R.drawable.ic_settings_gesture, onClickDataGathering)
+            NavRow(R.string.gesture_data_screen, R.drawable.lc_hand, onClickDataGathering)
     }
 }
 

@@ -174,7 +174,7 @@ class EmojiSearchActivity : ComponentActivity() {
                         val fontFamily = remember { KeyboardTypeface.customFontFamily() }
                         Row(modifier = Modifier.fillMaxWidth().height(30.dp)) {
                             IconButton(onClick = { cancel() }) {
-                                Icon(painter = painterResource(R.drawable.ic_arrow_back),
+                                Icon(painter = painterResource(R.drawable.lc_arrow_left),
                                     stringResource(R.string.spoken_description_action_previous),
                                     tint = Color(colors.get(ColorType.EMOJI_KEY_TEXT)))
                             }

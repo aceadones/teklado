@@ -87,12 +87,12 @@
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/config_floating_handle_height"
-            android:src="@drawable/ic_arrow_horizontal"/>
+            android:src="@drawable/lc_move_horizontal"/>
         <ImageView
             android:id="@+id/drag_handle"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/config_floating_handle_height"
-            android:src="@drawable/ic_drag_indicator"/>
+            android:src="@drawable/lc_move_diagonal"/>
     </LinearLayout>
 </LinearLayout>

@@ -396,7 +396,7 @@ fun GestureDataScreen(
                     navigationIcon = {
                         IconButton(onClick = { if (activeGathering) activeGathering = false else onClickBack() }) {
                             Icon(
-                                painterResource(R.drawable.ic_arrow_back),
+                                painterResource(R.drawable.lc_arrow_left),
                                 stringResource(R.string.spoken_description_action_previous)
                             )
                         }
@@ -481,7 +481,7 @@ fun GestureDataScreen(
         ExtendedFloatingActionButton(
             onClick = { nextWord(false) },
             text = { Text(stringResource(R.string.gesture_data_next)) },
-            icon = { Icon(painter = painterResource(R.drawable.ic_ime_switcher), stringResource(R.string.gesture_data_next)) },
+            icon = { Icon(painter = painterResource(R.drawable.lc_arrow_right), stringResource(R.string.gesture_data_next)) },
             modifier = Modifier
                 .wrapContentSize(Alignment.BottomStart)
                 .padding(all = 12.dp)
@@ -510,7 +510,7 @@ private fun BottomBar(hasWords: Boolean, onDeleted: () -> Unit) {
                     enabled = hasWords
                 ) {
                     Icon(
-                        painterResource(R.drawable.ic_bin_rounded),
+                        painterResource(R.drawable.lc_trash_2),
                         stringResource(R.string.delete),
                         Modifier.size(30.dp)
                     )
@@ -520,14 +520,14 @@ private fun BottomBar(hasWords: Boolean, onDeleted: () -> Unit) {
                     enabled = hasWords
                 ) {
                     Icon(
-                        painterResource(R.drawable.ic_share),
+                        painterResource(R.drawable.lc_upload),
                         "share",
                         Modifier.size(30.dp)
                     )
                 }
                 IconButton(onClick = { showLinks = true }) {
                     Icon(
-                        painterResource(R.drawable.ic_link),
+                        painterResource(R.drawable.lc_globe),
                         "links",
                         Modifier.size(30.dp)
                     )

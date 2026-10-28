@@ -77,7 +77,7 @@ fun <T: Any> ReorderDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    painterResource(R.drawable.ic_drag_indicator),
+                                    painterResource(R.drawable.lc_move_vertical),
                                     "Reorder",
                                     Modifier.padding(end = 6.dp),
                                     MaterialTheme.colorScheme.onSurfaceVariant

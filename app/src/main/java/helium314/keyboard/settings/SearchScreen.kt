@@ -46,7 +46,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -144,7 +143,7 @@ fun <T: Any?> SearchScreen(
                     actions = {
                         if (icon == null)
                             RoundIconButton(
-                                icon = R.drawable.sym_keyboard_search_lxx,
+                                icon = R.drawable.lc_search,
                                 contentDescription = stringResource(R.string.label_search_key),
                                 onClick = { setShowSearch(!showSearch) },
                                 modifier = Modifier.padding(end = 8.dp),
@@ -156,7 +155,7 @@ fun <T: Any?> SearchScreen(
                                 var showMenu by remember { mutableStateOf(false) }
                                 IconButton(
                                     onClick = { showMenu = true }
-                                ) { Icon(painterResource(R.drawable.ic_arrow_left), "menu", Modifier.rotate(-90f)) }
+                                ) { Icon(painterResource(R.drawable.lc_chevron_down), "menu") }
                                 DropdownMenu(
                                     expanded = showMenu,
                                     onDismissRequest = { showMenu = false }

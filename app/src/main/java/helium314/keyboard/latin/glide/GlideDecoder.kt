@@ -93,13 +93,25 @@ data class GlideResult(val word: String, val score: Int)
 object GlideDecoder {
     const val SAMPLE_COUNT = 64
     private const val MAX_RESULTS = 6
-    private const val FULL_LIMIT = 480
+    @Volatile @JvmField var fullLimit = 300
     private const val OUTPUT_SCALE = 1_000_000f
-    private const val ENDPOINT_WIDTHS = 1.85f
+    @Volatile @JvmField var endpointWidths = 1.6f
     private const val LOCATION_TOLERANCE_WIDTHS = 0.5f
     private const val MIN_LENGTH_RATIO = 0.38f
     private const val MAX_LENGTH_RATIO = 2.5f
     private const val DWELL_COVER_WIDTHS = 0.75f
+
+    /** Strength of the word-frequency prior; 0 keeps the legacy weak prior. Public for benchmarks. */
+    @Volatile @JvmField var langBeta = 1.6f
+    // scoring scales, public so the benchmark can tune them
+    @Volatile @JvmField var shapeScale = 0.22f
+    @Volatile @JvmField var pointScale = 0.42f
+    @Volatile @JvmField var visitScale = 0.33f
+    @Volatile @JvmField var shapeWeight = 0.352f
+    @Volatile @JvmField var pointMix = 0.95f
+    @Volatile @JvmField var lengthScale = 0.35f
+    @Volatile @JvmField var lengthMix = 0.50f
+    @Volatile @JvmField var dwellMin = 0.55f
 
     private val scratchLock = Any()
     private val scratch = Scratch()
@@ -148,7 +160,7 @@ object GlideDecoder {
         writeNormalized(s.userX, s.userY, s.normX, s.normY)
         val dwells = collectDwells(s, kept, width)
 
-        val limit2 = (ENDPOINT_WIDTHS * width) * (ENDPOINT_WIDTHS * width)
+        val limit2 = (endpointWidths * width) * (endpointWidths * width)
         val sx = s.userX[0]
         val sy = s.userY[0]
         val ex = s.userX[SAMPLE_COUNT - 1]
@@ -183,7 +195,7 @@ object GlideDecoder {
             }
         }
         if (candidates == 0) return emptyList()
-        val full = selectLowest(s.candIds, s.candCheap, candidates, FULL_LIMIT)
+        val full = selectLowest(s.candIds, s.candCheap, candidates, fullLimit)
 
         val bestScore = FloatArray(MAX_RESULTS)
         val bestFreq = IntArray(MAX_RESULTS)
@@ -215,7 +227,7 @@ object GlideDecoder {
             bestWord[pos] = word
             if (bestCount < MAX_RESULTS) bestCount++
         }
-        if (bestCount == 0 || bestScore[0] < 0.05f) return emptyList()
+        if (bestCount == 0 || bestScore[0] < 0.05f * (if (langBeta > 0f) exp(-langBeta) else 1f)) return emptyList()
         val out = ArrayList<GlideResult>(bestCount)
         for (i in 0 until bestCount) {
             val scaled = (bestScore[i] * OUTPUT_SCALE).toInt().coerceAtLeast(1)
@@ -284,22 +296,22 @@ object GlideDecoder {
         val location = locationDistance(s.userX, s.userY, s.idealX, s.idealY, LOCATION_TOLERANCE_WIDTHS * width)
         val visit = visitDistance(lexicon, from, to, geometry, s, LOCATION_TOLERANCE_WIDTHS * width)
         val ratio = if (userLength < 1f) 1f else (idealLength / userLength).coerceIn(MIN_LENGTH_RATIO, MAX_LENGTH_RATIO)
-        val shapeSim = exp(-shape / 0.22f)
-        val pointSim = exp(-location / (width * 0.70f))
-        val visitSim = exp(-visit / (width * 0.55f))
-        val locSim = 0.60f * pointSim + 0.40f * visitSim
-        val lengthSim = exp(-abs(ln(ratio)) / 0.35f)
-        val spatial = 0.44f * shapeSim + 0.56f * locSim
+        val shapeSim = exp(-shape / shapeScale)
+        val pointSim = exp(-location / (width * pointScale))
+        val visitSim = exp(-visit / (width * visitScale))
+        val locSim = pointMix * pointSim + (1f - pointMix) * visitSim
+        val lengthSim = exp(-abs(ln(ratio)) / lengthScale)
+        val spatial = shapeWeight * shapeSim + (1f - shapeWeight) * locSim
         val coverage = dwellCoverage(lexicon, from, to, geometry, s, dwells, width)
-        val dwellFactor = if (dwells == 0) 1f else 0.55f + 0.45f * coverage
+        val dwellFactor = if (dwells == 0) 1f else dwellMin + (1f - dwellMin) * coverage
         val freqNorm = lexicon.frequency[word].coerceIn(0, 320) / 320f
-        val lang = 0.84f + 0.16f * freqNorm
+        val lang = if (langBeta > 0f) exp(langBeta * (freqNorm - 1f)) else 0.84f + 0.16f * freqNorm
         var bigramAdd = 0f
         if (!previousWord.isNullOrEmpty()) {
             val probability = lexicon.bigram(previousWord, lexicon.words[word])
             if (probability > 0) bigramAdd = 0.05f * (min(probability, 255) / 255f)
         }
-        return spatial * (0.50f + 0.50f * lengthSim) * dwellFactor * lang + bigramAdd
+        return spatial * ((1f - lengthMix) + lengthMix * lengthSim) * dwellFactor * lang + bigramAdd
     }
 
     private fun dwellCoverage(

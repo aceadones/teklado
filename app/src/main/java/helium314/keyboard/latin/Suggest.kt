@@ -67,7 +67,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
                 inputStyle, isCorrectionEnabled, sequenceNumber)
         } else {
             // load the glide word list while the user types, so the first swipe has candidates
-            if (!JniUtils.sHaveGestureLib) GlideBatchSuggestions.prewarm(keyboard, mDictionaryFacilitator)
+            if (!JniUtils.sHaveGestureLib && GlideBatchSuggestions.builtInEnabled) GlideBatchSuggestions.prewarm(keyboard, mDictionaryFacilitator)
             getSuggestedWordsForNonBatchInput(wordComposer, ngramContext, keyboard, settingsValuesForSuggestion,
                 inputStyle, isCorrectionEnabled, sequenceNumber)
         }
@@ -277,7 +277,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         settingsValuesForSuggestion: SettingsValuesForSuggestion,
         inputStyle: Int, isCorrectionEnabled: Boolean, sequenceNumber: Int
     ): SuggestedWords {
-        val suggestionResults = if (JniUtils.sHaveGestureLib) {
+        val suggestionResults = if (JniUtils.sHaveGestureLib || !GlideBatchSuggestions.builtInEnabled) {
             mDictionaryFacilitator.getSuggestionResults(
                 wordComposer.composedDataSnapshot, ngramContext, keyboard,
                 settingsValuesForSuggestion, SESSION_ID_GESTURE, inputStyle
