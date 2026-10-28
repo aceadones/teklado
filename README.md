@@ -8,11 +8,11 @@
 It is a fork of [HeliBoard](https://github.com/Helium314/HeliBoard) with its own look, built-in glide typing and
 extra features aimed at fast bilingual (Filipino / English) typing.
 
-> Status: early beta. Things work, but expect rough edges.
+> Status: early beta. Things work, but expect rough edges. Glide typing is experimental and not reliable yet; for swiping, keep using Gboard and switch to Teklado for everything else.
 
 ## What's in it
 
-- **Glide typing** with a built-in, open-source decoder (no closed-source library needed). *Experimental.*
+- **Glide typing** with a built-in, open-source decoder (no closed-source library needed). *Experimental, not reliable yet.*
 - Autocorrect, suggestions, clipboard history, themes with your own background image, resizable keyboard.
 - **Menu and pinned keys**: tap the menu icon for every tool; pin your favorites (clipboard, voice, undo by default) to the top bar.
 - **Emoji Kitchen**: type two emojis and tap the sticker that appears. Sticker images are fetched from Google's servers only when used.
