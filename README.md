@@ -44,8 +44,6 @@ Teklado is free software under the **GNU GPL v3** (see [LICENSE](LICENSE)).
 - Based on [HeliBoard](https://github.com/Helium314/HeliBoard) by Helium314 and contributors (forked at commit `44ddb1a`),
   which is in turn based on OpenBoard and the Android Open Source Project keyboard (Apache-2.0, see [LICENSE-Apache-2.0](LICENSE-Apache-2.0)).
 - Glide decoder: written for Teklado, following the SHARK2 approach of Kristensson and Zhai.
-- Filipino word list used for glide (`app/src/main/assets/glide/fil_words.tsv`): derived from
-  [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (OpenSubtitles 2018), CC BY-SA 4.0.
 - Icons: [Lucide](https://lucide.dev) (ISC license, Copyright (c) Lucide Icons and Contributors).
 - Emoji Kitchen pair data comes from [xsalazar/emoji-kitchen-backend](https://github.com/xsalazar/emoji-kitchen-backend)
   (the data behind [emojikitchen.dev](https://emojikitchen.dev)). The sticker images are Google's and are not bundled.

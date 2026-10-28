@@ -93,25 +93,30 @@ data class GlideResult(val word: String, val score: Int)
 object GlideDecoder {
     const val SAMPLE_COUNT = 64
     private const val MAX_RESULTS = 6
-    @Volatile @JvmField var fullLimit = 300
+    @Volatile @JvmField var fullLimit = 500
     private const val OUTPUT_SCALE = 1_000_000f
     @Volatile @JvmField var endpointWidths = 1.6f
-    private const val LOCATION_TOLERANCE_WIDTHS = 0.5f
-    private const val MIN_LENGTH_RATIO = 0.38f
+    @Volatile @JvmField var toleranceWidths = 0.42f
+    /** How much a known next-word relation (previous word -> this word) boosts a candidate. */
+    @Volatile @JvmField var bigramGain = 2.5f
+    /** Touch-down and lift-off are deliberate, so how far they are from the first/last letter counts a lot. */
+    @Volatile @JvmField var endSigma = 0.75f
+    @Volatile @JvmField var cheapPrior = 0.54f
+    private const val MIN_LENGTH_RATIO = 0.30f
     private const val MAX_LENGTH_RATIO = 2.5f
     private const val DWELL_COVER_WIDTHS = 0.75f
 
     /** Strength of the word-frequency prior; 0 keeps the legacy weak prior. Public for benchmarks. */
-    @Volatile @JvmField var langBeta = 1.6f
+    @Volatile @JvmField var langBeta = 2.25f
     // scoring scales, public so the benchmark can tune them
-    @Volatile @JvmField var shapeScale = 0.22f
-    @Volatile @JvmField var pointScale = 0.42f
-    @Volatile @JvmField var visitScale = 0.33f
-    @Volatile @JvmField var shapeWeight = 0.352f
+    @Volatile @JvmField var shapeScale = 0.275f
+    @Volatile @JvmField var pointScale = 0.121f
+    @Volatile @JvmField var visitScale = 0.66f
+    @Volatile @JvmField var shapeWeight = 0.704f
     @Volatile @JvmField var pointMix = 0.95f
-    @Volatile @JvmField var lengthScale = 0.35f
-    @Volatile @JvmField var lengthMix = 0.50f
-    @Volatile @JvmField var dwellMin = 0.55f
+    @Volatile @JvmField var lengthScale = 0.896f
+    @Volatile @JvmField var lengthMix = 0.18f
+    @Volatile @JvmField var dwellMin = 0.95f
 
     private val scratchLock = Any()
     private val scratch = Scratch()
@@ -267,7 +272,8 @@ object GlideDecoder {
         val last = lexicon.keyIndices[to - 1]
         val start = hypot(sx - geometry.centerX[first], sy - geometry.centerY[first])
         val end = hypot(ex - geometry.centerX[last], ey - geometry.centerY[last])
-        return start + end + abs(ln(ratio)) * width
+        val prior = lexicon.frequency[word].coerceIn(0, 320) / 320f
+        return start + end + abs(ln(ratio)) * width + width * 2f - cheapPrior * width * prior
     }
 
     private fun scoreWord(
@@ -293,8 +299,8 @@ object GlideDecoder {
         }
         resample(s.polyX, s.polyY, count, s.idealX, s.idealY, s.cum)
         val shape = shapeDistance(s.normX, s.normY, s.idealX, s.idealY)
-        val location = locationDistance(s.userX, s.userY, s.idealX, s.idealY, LOCATION_TOLERANCE_WIDTHS * width)
-        val visit = visitDistance(lexicon, from, to, geometry, s, LOCATION_TOLERANCE_WIDTHS * width)
+        val location = locationDistance(s.userX, s.userY, s.idealX, s.idealY, toleranceWidths * width)
+        val visit = visitDistance(lexicon, from, to, geometry, s, toleranceWidths * width)
         val ratio = if (userLength < 1f) 1f else (idealLength / userLength).coerceIn(MIN_LENGTH_RATIO, MAX_LENGTH_RATIO)
         val shapeSim = exp(-shape / shapeScale)
         val pointSim = exp(-location / (width * pointScale))
@@ -302,16 +308,22 @@ object GlideDecoder {
         val locSim = pointMix * pointSim + (1f - pointMix) * visitSim
         val lengthSim = exp(-abs(ln(ratio)) / lengthScale)
         val spatial = shapeWeight * shapeSim + (1f - shapeWeight) * locSim
+        val firstKey = lexicon.keyIndices[from]
+        val lastKey = lexicon.keyIndices[to - 1]
+        val ds2 = dist2(s.userX[0], s.userY[0], geometry.centerX[firstKey], geometry.centerY[firstKey])
+        val de2 = dist2(s.userX[SAMPLE_COUNT - 1], s.userY[SAMPLE_COUNT - 1], geometry.centerX[lastKey], geometry.centerY[lastKey])
+        val endSim = exp(-(ds2 + de2) / (2f * endSigma * endSigma * width * width))
         val coverage = dwellCoverage(lexicon, from, to, geometry, s, dwells, width)
         val dwellFactor = if (dwells == 0) 1f else dwellMin + (1f - dwellMin) * coverage
         val freqNorm = lexicon.frequency[word].coerceIn(0, 320) / 320f
         val lang = if (langBeta > 0f) exp(langBeta * (freqNorm - 1f)) else 0.84f + 0.16f * freqNorm
         var bigramAdd = 0f
+        var bigramBoost = 1f
         if (!previousWord.isNullOrEmpty()) {
             val probability = lexicon.bigram(previousWord, lexicon.words[word])
-            if (probability > 0) bigramAdd = 0.05f * (min(probability, 255) / 255f)
+            if (probability > 0) bigramBoost = 1f + bigramGain * (min(probability, 255) / 255f)
         }
-        return spatial * ((1f - lengthMix) + lengthMix * lengthSim) * dwellFactor * lang + bigramAdd
+        return spatial * endSim * ((1f - lengthMix) + lengthMix * lengthSim) * dwellFactor * lang * bigramBoost + bigramAdd
     }
 
     private fun dwellCoverage(
@@ -338,6 +350,10 @@ object GlideDecoder {
         return covered.toFloat() / dwells
     }
 
+    /**
+     * How far the stroke is from passing through each letter key, in order. Dynamic programming over the
+     * resampled stroke: letter i must be reached at or after the point where letter i-1 was reached.
+     */
     private fun visitDistance(
         lexicon: CompiledGlideLexicon,
         from: Int,
@@ -346,23 +362,38 @@ object GlideDecoder {
         s: Scratch,
         tolerance: Float,
     ): Float {
-        var excess = 0f
         val keys = to - from
-        for (i in from until to) {
-            val key = lexicon.keyIndices[i]
+        var prev = s.dpPrev
+        var cur = s.dpCur
+        for (i in 0 until keys) {
+            val key = lexicon.keyIndices[from + i]
             val cx = geometry.centerX[key]
             val cy = geometry.centerY[key]
-            var best = Float.MAX_VALUE
+            var running = Float.MAX_VALUE
             for (p in 0 until SAMPLE_COUNT) {
-                val d2 = dist2(s.userX[p], s.userY[p], cx, cy)
-                if (d2 < best) best = d2
+                val dist = sqrt(dist2(s.userX[p], s.userY[p], cx, cy))
+                val excess = if (dist > tolerance) dist - tolerance else 0f
+                if (i == 0) {
+                    cur[p] = excess
+                } else {
+                    if (prev[p] < running) running = prev[p]
+                    cur[p] = running + excess
+                }
             }
-            val dist = sqrt(best)
-            if (dist > tolerance) excess += dist - tolerance
+            val swap = prev
+            prev = cur
+            cur = swap
         }
-        return excess / keys
+        var best = Float.MAX_VALUE
+        for (p in 0 until SAMPLE_COUNT) if (prev[p] < best) best = prev[p]
+        return best / keys
     }
 
+    /**
+     * Symmetric nearest-point distance between the stroke and the word's ideal path. Unlike a point-by-point
+     * comparison it does not care how fast or unevenly the finger moved, only whether both paths follow
+     * the same route.
+     */
     private fun locationDistance(
         userX: FloatArray,
         userY: FloatArray,
@@ -370,12 +401,25 @@ object GlideDecoder {
         idealY: FloatArray,
         tolerance: Float,
     ): Float {
+        val tol2 = tolerance * tolerance
         var excess = 0f
         for (i in 0 until SAMPLE_COUNT) {
-            val dist = hypot(userX[i] - idealX[i], userY[i] - idealY[i])
-            if (dist > tolerance) excess += dist - tolerance
+            var best = Float.MAX_VALUE
+            for (j in 0 until SAMPLE_COUNT) {
+                val d2 = dist2(userX[i], userY[i], idealX[j], idealY[j])
+                if (d2 < best) best = d2
+            }
+            if (best > tol2) excess += sqrt(best) - tolerance
         }
-        return excess / SAMPLE_COUNT
+        for (j in 0 until SAMPLE_COUNT) {
+            var best = Float.MAX_VALUE
+            for (i in 0 until SAMPLE_COUNT) {
+                val d2 = dist2(userX[i], userY[i], idealX[j], idealY[j])
+                if (d2 < best) best = d2
+            }
+            if (best > tol2) excess += sqrt(best) - tolerance
+        }
+        return excess / (2 * SAMPLE_COUNT)
     }
 
     private fun shapeDistance(userNormX: FloatArray, userNormY: FloatArray, idealX: FloatArray, idealY: FloatArray): Float {
@@ -628,6 +672,8 @@ object GlideDecoder {
         val idealY = FloatArray(SAMPLE_COUNT)
         var polyX = FloatArray(64)
         var polyY = FloatArray(64)
+        val dpPrev = FloatArray(SAMPLE_COUNT)
+        val dpCur = FloatArray(SAMPLE_COUNT)
         val dwellX = FloatArray(12)
         val dwellY = FloatArray(12)
         var startKeys = IntArray(64)

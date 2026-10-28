@@ -498,7 +498,6 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onCreate() {
-        helium314.keyboard.latin.glide.GlideAssets.context = getApplicationContext();
         mSettings.startListener();
         KeyboardIconsSet.Companion.getInstance().loadIcons(this);
         mRichImm = RichInputMethodManager.getInstance();
